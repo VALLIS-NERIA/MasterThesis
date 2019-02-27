@@ -17,5 +17,8 @@
             "%PDF%"
         ]
     },
-    "[latex]": {}
+    "[latex]": {},
+    "editor.fontFamily": "Consolas, 微软雅黑, 'Courier New', monospace",
+    "editor.fontLigatures": true,
+    "editor.fontSize": 16
 }

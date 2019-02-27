@@ -879,6 +879,7 @@
   labelsep = zhspace,
 }
 \ifustc@graduate
+  % \captionsetup{font+=bf}
   \captionsetup{font+=bf}
 \fi
 \captionsetup[figure]{
