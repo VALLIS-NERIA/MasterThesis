@@ -1,4 +1,4 @@
-\chapter{SDN中流量测量sketch的研究现状}
+\chapter{SDN中流量测量sketch的研究现状}\label{chap:sketch}
 
 本章将介绍4种典型的用于流量测量的sketch，并分析它们为何无法适用于SDN。
 
@@ -91,7 +91,7 @@ SketchVisor \cite{huang2017sketchvisor}论文为其中的“Fast Path”设计�
 如表\ref{tbl:sketchvisor}所示，SketchVisor的计算负载只在kick-out比率不超过1\%时才能够接受。也就是说，SketchVisor的表中所存储的流的流量之和要超过全部流量的99\%。
 在实际网络中，由于流是在变化的，用一张表追踪99\%的流量明显不切实际。更何况要囊括更多的流，$k$也要随之增大，导致占用的内存空间也会增大。
 
-\section{现有方法的不足}\label{subsec:observation}
+\section{现有方法的不足}\label{sec:observation}
 
 \begin{table*}[t]
 	\centering
@@ -118,9 +118,11 @@ Reversible Sketch \cite{schweller2007reversible}将流ID拆分成多个部分并
 FlowRadar \cite{li2016flowradar}使用连续的异或运算来编码和恢复流的ID。
 然而，根据SketchVisor \cite{huang2017sketchvisor}中的测试结果，这些改进算法的计算负载都比较高。
 
-SketchVisor有着较高的流量统计精度，然而它的计算负载取决于kick-out出现的频率。随着kick-out比率的增加，SketchVisor的计算负载迅速增加并且变得无法负担。因而SketchVisor无法胜任大多数的应用情景。
+SketchVisor有着较高的流量统计精度，然而它的计算负载取决于kick-out出现的频率。
+随着kick-out比率的增加，SketchVisor的计算负载迅速增加并且变得无法负担。因而SketchVisor无法胜任大多数的应用情景。
 
-CountSketch和FSS都使用了辅助数据结构，最坏情形下的更新操作的时间复杂度是$O(k)$。第XXXXX章当中提供了一种用空间换时间的实现，使得最坏情形的时间复杂度降为$O(\log{k})$。
+CountSketch和FSS都使用了辅助数据结构，最坏情形下的更新操作的时间复杂度是$O(k)$。
+第XXXXX章当中提供了一种用空间换时间的实现，使得最坏情形的时间复杂度降为$O(\log{k})$。
 这个结果看起来似乎是可接受的，然而第XXXX章中的模拟结果显示，这两种$O(\log{k})$的sketch的计算负载对于承载大量数据的交换机而言还是太大了。
 
 我们用一个例子来帮助理解交换机的CPU资源与sketch的计算负载之间的关系。
@@ -130,9 +132,11 @@ CountSketch和FSS都使用了辅助数据结构，最坏情形下的更新操作
     N = (10\times 10^9\cdot 24 \cdot \beta)/(0.5\times 10^3 \times 8) = 1.2\times 10^7
 \end{equation}
 
-在这样的假设下，交换机中的sketch应当每秒至少能处理1200万个数据包。第XXXX章中我们对CountSketch和FSS的速度进行了测试，结果显示CountSketch和FSS处理一个数据包所需的CPU时钟周期数分别是约170和110。
-假设这个交换机的CPU主频是1.5GHz（相当于市场上的中端水平），CountSketch和FSS分别占用了68\%和44\%的CPU时间。
-事实上，交换机的CPU还要承担其他的一些工作，比如流表的操作，而且交换机上可能还会运行一些其他的服务，网络负载可能会比例子中的更高，这些因素要求了sketch的计算负载必须更低。
+在这样的假设下，交换机中的sketch应当每秒至少能处理1200万个数据包。
+第XXXX章中我们对CountSketch和FSS的速度进行了测试，结果显示CountSketch和FSS处理一个数据包所需的CPU时钟周期数分别是约170和110。
+假设这个交换机的CPU主频是1.5GHz，有2个物理核心（在市面上的交换机当中已经属于高端配置），CountSketch和FSS分别占用了68\%和44\%的CPU时间。
+事实上，交换机的CPU还要承担其他的一些工作，比如流表的操作。
+而且交换机上可能还会运行一些其他的服务，网络负载可能会比例子中的更高，这些因素要求了sketch的计算负载必须更低。
 
 除了测量大流的流量统计信息之外，正确的识别出大流也是必不可少的功能。在本文中，只要一条流在sketch中的查询结果不为空，就将其视为“被追踪”的。
 被sketch所追踪的大流越多，就可以提供越多的有用信息，提升重路由等应用的质量。

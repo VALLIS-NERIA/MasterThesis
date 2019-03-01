@@ -45,14 +45,17 @@ CountSketch\cite{charikar2004finding}和Filtered Space-Saving(FSS)\cite{homem201
 例如，CountSketch和FSS都需要在一个堆当中搜索某个给定的流ID是否存在。在不使用辅助数据结构的情况下，这个操作不得不遍历整个堆。具体的计算负载的分析将会在后续章节中分析。%TODO
 
 由于现有的sketch无法在保持统计精度的同时降低自身的计算负载，因此我们有必要设计一个新的测量方法，拥有较高的统计精度而不占用过多的计算和存储资源。
-本文提出了名为“CountMax”的轻量级流量测量方案。与SketchVisor、CountSketch和FSS相比，CountMax有着存储占用低、计算负载低、结构简单可分布的优势，并且有着不相上下的流量统计精度。
-本文首先提出了CountMax的top-$k$ sketch，并在理论上证明了它的精确度和时间复杂度；随后讨论了CountMax在几种常见的应用中的性能。
-实验结果显示，在占用相同存储空间的情况下，CountMax的计算负载只有CountSketch和FSS的二分之一到三分之一。并且由于CountMax节约内存的特点，在相同内存占用时，CountMax的统计精确度略高于CountSketch和FSS。
+本文提出了名为“CountMax”的轻量级流量测量方案。与SketchVisor、CountSketch和FSS相比，CountMax具有以下优势：
+\begin{enumerate}
+    \item 测量精度高。在使用同样的内存空间时，CountMax的测量精度优于CountSketch和FSS约20\%。
+    \item 存储占用低。CountMax不需要任何辅助数据结构，除了几十字节的元数据之外，占用的所有内存都是有效信息。
+    \item 计算负载低。对每个到达的数据包，CountMax的每一“行”只需要执行一次哈希操作、一次比较操作和一次加法操作。
+    \item 结构简单易于分布。一个CountMax sketch可以轻易地被拆分为多个，部署在不同的交换机上。通过安排每个交换机只处理一部分的流，可以将计算负载更平均地均摊到每个交换机之间。
+\end{enumerate}
+
+文章首先提出了CountMax的top-$k$ sketch，并在理论上证明了它的精确度和时间复杂度；
+随后讨论了CountMax在几种常见的应用中的性能，并通过实验对CountMax的性能进行测试。
 
 %最后，本文讨论了如何在不同交换机中部署测量工具的问题
-% \begin{enumerate}
-%     \item 存储占用低。CountMax不需要任何辅助数据结构，除了几十字节的元数据之外，占用的所有内存都是有效信息。
-%     \item 计算负载低。对每个到达的数据包，CountMax的每一“行”只需要执行一次哈希操作、一次比较操作和一次加法操作。
-%     \item 结构简单易于分布。一个CountMax sketch可以轻易地被拆分为多个，部署在不同的交换机上。通过安排每个交换机只处理一部分的流，可以将计算负载更平均地均摊到每个交换机之间。
-% \end{enumerate}
+
 
