@@ -84,7 +84,7 @@ Spine-Leaf拓扑则设置为27个“脊”交换机和54个“叶”交换机。
 \end{table}
 
 
-\subsection{存储占用分析}
+\subsection{存储占用分析}\label{subsec:memory}
 
 为了进行公平的性能对比，我们希望参与比较的3中sketch使用尽量相同的内存空间。因此首先我们分析这些sketch的存储空间消耗。
 表\ref{tbl:datasize}中列出了几种基本数据类型的大小。本文的所有测试中，流的ID都是五元组的形式，其中包含源、目的IP地址和端口，以及协议。

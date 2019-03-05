@@ -1,1 +1,135 @@
-\chapter{最大化流统计覆盖问题}
+\chapter{最大化流统计覆盖问题（MSC）}
+本章我们详细讨论流统计部署问题的目标，并给出最大化流统计覆盖问题的定义。
+\section{问题建模}
+
+\subsection{网络模型}
+假定一个SDN中包含了一个集中式的控制器，以及一组交换机，定义其集合为$V=\{v_1, ..., v_n\} $，其中$ n = |V| $。
+其中每个交换机上都包含有一个用于测量流量的sketch，以及一组规则。
+这些规则的形式与OpenFlow\cite{pfaff2012openflow}中流表项类似，包括Match Field、Priority。
+对于每个传入交换机的数据包，如果能够匹配这些规则中的某一项，那么这个数据包就会传递给sketch进行处理；反之则不会被sketch处理。
+
+\subsection{流量统计的代价与收益}
+在第\ref{chap:sketch}章中，我们讨论了流量统计的代价主要是计算负载。
+而在流量统计部署问题中，计算负载只和要处理的数据包数相关，因而流量统计的代价就是要处理的数据包的数量。
+在没有关于流的先验知识的条件下，要寻找更多的大流，只能采用广撒网的方式。
+因而流量统计中的收益就是可以统计到的流的数量。
+
+由于流统计部署是在流发出之前进行的，因此一定程度的先验知识是必要的。
+假设预先知道所有流的信息和流量是不切实际的，但是对有规律的一组流的预测是可行的。
+根据一定的规则将网络中的流划分为不同的部分，如依据源或目的端的类型、所述的服务器集群等，每一部分称之为一个掩码（wildcard）\cite{xu2017miniming}。
+依靠过去的统计经验，可以对经由交换机上的每个掩码进行一定程度的预测，包括总数据流量、流数以及可能的大流的数量。
+由此，我们可以估算每个掩码给交换机带来的代价和收益。
+
+% 由于问题讨论的是事前部署，因此流量统计的代价与收益要分为有先验知识和无先验知识分别讨论。
+
+% 在无先验知识的情况下，我们对网络中的流一无所知，包括网络中的流的数量、流量特征等等。
+% 在此情况下，我们只能使用一些随机化的方式，如\ref{sec:coop}节的协作式，通过哈希等方式尽量将不同的流分配到不同的交换机进行处理。
+% 这种方式的效果受流量特征的影响极大，同时由于缺少信息导致无法确保部署方案不会超出交换机的负载上限，因而本文暂不考虑无先验知识的部署。
+
+% 有先验知识的情况下，最理想的情形就是我们预先知道网络中的每一条流和它们的流量。
+% 在实际当中这是不可能的。
+% 然而我们可以做一些较弱的假设。
+% 根据以往的统计数据和经验，我们可以预测一个wildcard可能有多少流量，是否包含大流。
+% 例如，源地址是视频存储服务器的流，有更大概率有着较大的流量。
+% 并且根据过去的统计信息，也可以预测一段时间内这样的流的数量和总流量大小。
+% 因此便可以定义一个wildcard的代价为它的预期流量，收益为wildcard预期包含的流的数量。
+
+
+
+% 在SDN中，交换机每遇到流表中无法匹配的流时，就会将这条流的信息上传到控制器。
+% 控制器为这条流选择路由后，再下发流表到相应的交换机中。
+% 有的时候控制器下发的流表项当中的匹配域不是某条精确的流，而是一个根据流的目的地址进行匹配的掩码\cite{xu2017miniming}。
+% 掩码可以看做是一个流的集合，精确匹配的流可以看做是一个只包含一条流的集合，我们可以认为控制器知道网络中所有已经出现的这种集合的信息。
+
+% 如果控制器能够在下发流表到交换机的同时指示交换机是否测量匹配该流表的流的话，就相当于在进行部署时得知了网络中所有流的信息。
+
+
+
+\section{最大化流统计覆盖问题的定义}\label{sec:mscdef}
+我们将所有流划分为$m$个掩码，记为一个集合$\Omega=\{r_1,r_2,...,r_m\}$，其中$m = |\Omega|$。
+其中每一个掩码都是若干条流的集合。在某台交换机上“激活”该掩码，则该掩码中的流在途经这台交换机时就会被测量。
+对于交换机$v_i$而言，记所有经过$v_i$的流的集合为$\Pi_i$，其中属于掩码$r_j$的部分记为$\Pi^j_i$。
+对每个交换机，掩码必须满足如下的性质：
+1. 完备性，即$\bigcup\nolimits_{r_j \in \Omega} \Pi^j_i = \Pi_i, \forall v_i \in V$；
+2. 互斥性，即$\Pi^{j_1}_i \cap \Pi^{j_2}_i = \Phi, \forall r_{j_1} \neq r_{j_2}, \forall v_i \in V$。
+
+我们已知每个掩码在每个交换机上的代价和收益，分别记为$c(\Pi^j_i)$和$w(\Pi^j_i)$。
+特别注意的是，$c(\Pi^j_i)$是固定的，$w(\Pi^j_i)$则不是。
+如果$\Pi^j_i$当中的某条流恰好已经被其它交换机所测量，那么$w(\Pi^j_i)$就会相应地减少，因为对一条流进行重复测量是没有意义的。
+每个交换机有一个代价上限，对应其CPU资源的限制，记为$B_i$。
+每个交换机上被激活的掩码的代价之和不能超过$B_i$。
+令$x_i^j$表示$r_j$在$v_i$上是否激活，激活为1，否则为0，则资源限制的规则可以写为：
+
+\begin{equation}
+    \sum_{i,j} x_i^j c(\Pi^j_i) \le B_i, \forall v_i,r_j   
+\end{equation}
+
+交换机$v_i$的总收益为：
+
+\begin{equation}
+    w(\Pi_i) = \sum_{j} x_i^j w(\Pi^j_i), \forall r_j
+\end{equation}
+
+于是，整个网络的总收益就是：
+\begin{equation}
+\begin{aligned}
+    W &= \sum_i w(\Pi_i), \forall v_i
+      &= \sum_{i,j} x_i^j w(\Pi^j_i), \forall v_i,r_j
+\end{aligned}
+\end{equation}
+
+因此，最大化流统计覆盖问题（Maximum Statistics Coverage, MSC）问题可定义如下：
+
+\begin{equation*}
+\max :  W
+\end{equation*}
+
+\begin{equation}\label{eq:msc}
+{S.t.}
+\begin{cases}
+W = \sum_{i,j} x_i^j w(\Pi^j_i) &, \forall v_i,r_j\\
+\sum_{i,j} x_i^j c(\Pi^j_i) \le B_i &, \forall v_i,r_j   \\
+x^j_{i}\in \left\{ {0,1} \right\} &,   \forall v_i,r_j  \\
+\end{cases}
+\end{equation}
+
+\begin{theorem}\label{thm:nphard}
+    MSC问题是NP-难的。
+\end{theorem}
+
+\begin{proof}
+我们通过证明单背包问题\cite{ingargiola1973reduction}是MSC问题的一个特例来证明MSC是NP难的。
+假设网络中仅有一台交换机$v_i$，那么MSC问题就变成将一系列掩码部署到$v_i$中的问题。
+我们将每个掩码视作一个“物品”，其价值是$w(\Pi^j_i)$，代价是$c(\Pi^j_i)$。
+再将$v_i$视作一个“背包”，那么它的容量就是$B_i$。
+则此情况下MSC问题变为一个单背包问题。
+由于单背包问题是NP难的\cite{ingargiola1973reduction}，因此MSC问题也是NP难的。
+\end{proof}
+
+
+\section{MSC与已存在问题的区别}\label{sec:differenceproblem}
+
+MSC问题与一些已被讨论过的问题有着相似之处，如“maximum coverage problem”\cite{khuller1999budgeted}或者“maximum coverage problem with group budget constraints”\cite{chekuri2004maximum}。
+接下来我们讨论MSC与这些问题的不同之处
+
+\subsection{Budgeted Maximum Coverage (BMC)\cite{khuller1999budgeted}}
+给定一个集合$X$，其中的每个元素称为一个“物品”，并分别具有价值。
+$\mathds{S}=\{S_1,S_2,...,S_p\}$是一个集合的集合，其中每个元素$S_j$都是$X$的子集，并且具有一个代价$c(S_j)$。
+BMC问题给定一个总代价上限$\mathds{C} $，寻找集合$\mathds{S}$的一个子集$\mathds{S}'$，使得其中的代价之和不超过$\mathds{C} $，而覆盖的物品的价值最大。
+
+\textbf{MSC问题与BMC问题的区别：} 
+BMC当中每个选中的$S_i$都被放在一个“组”中，并且也只有一个总的代价上限。
+而MSC中每个交换机都相当于一个“组”，且每“组”都有独立的代价上限。
+
+
+\subsection{Maximum Coverage with Group Budget Constraints (MCG)\cite{chekuri2004maximum}}\label{def:mcg}
+给定一个集合$X$，其中的每个元素称为一个“物品”，并分别具有价值。
+$\mathds{S}=\{S_1,S_2,...,S_p\}$是一个集合的集合，其中每个元素$S_j$都是$X$的子集，并且具有一个代价$c(S_j)$。
+给定$l$个集合$G_1,G_2,...,G_l$，其中每个$G_i$都是$\mathds{S}$的子集，称为一个组。
+每个组都有一个代价上限$\mathds{C}_i$，所有组共享一个总代价的上限$\mathds{C} $。
+
+MCG问题要求在同时满足所有组的代价上限、以及总代价上限的情况下，找到一个价值最大的解。
+
+\textbf{MSC问题与MCG问题的区别：} 
+我们可以将每条流看作一个物品，每个掩码看作是$\mathds{S}$中的元素，每个交换机看作一个组。
+则MSC问题与MCG的根本区别在于：同一个掩码在不同的交换机上的代价和价值都不同。

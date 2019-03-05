@@ -1,1 +1,92 @@
-\chapter{MSC：流统计覆盖的解决算法}
+\chapter{GMSC：流统计覆盖的解决算法}\label{chap:gmsc}
+在本章，我们提出一个简单但有效的算法解决MSC问题，称为GMSC。
+
+\section{算法设计}\label{sec:gmsc}
+如第\ref{sec:mscdef}节中定理\ref{thm:nphard}的证明，在只考虑交换机$v_i$的情况下，MSC问题退化为单背包问题。
+我们可以对每个交换机分别求解单背包问题，获得每个交换机的最大容纳价值，记为$p(v_i)$。
+接下来选择$p(v_i)$最大的那个交换机，将背包问题的解应用到此交换机上。
+最后，由于这个交换机被分配了掩码，要相应的更新这些掩码在其余交换机上的价值。
+重复这个过程，直到所有交换机都被分配过为止。
+
+这是一个贪心（Greedy）算法，因而称其为GMSC。
+\begin{algorithm}[htb]
+    \small
+    \SetAlgoLined
+    \KwData{$V$：交换机的集合；$F$：覆盖的所有流的集合}
+    $F=\Phi$\;
+    \While{$|V|>0$}{
+        \ForEach{$V$中的交换机$v$}{
+            求解单背包问题，得到$v$的最大价值$p(v)$和对应的解$S(v)$。记$S(v)$中覆盖的流的集合为$F(v)$\;
+        }
+        找出$m$，使$p(v_m)$最大\;
+        将$S(v_m)$中的掩码应用到$v_m$上\;
+        将$F(v)$中覆盖的流加入$F$\;
+        从$V$中移除$V_m$\;
+
+        \ForEach{$V$中的交换机$v_i$}{
+            \ForEach{$\Omega$中的掩码$r_j$}{
+                更新$p(\Pi_i^j)$，去除$\Pi_i^j \cap F(v)$部分的价值\;
+            }
+        }
+    }
+    \caption{GMSC}
+    \label{alg:count_max}
+\end{algorithm}
+
+\section{单背包问题的解法}
+作为一个经典问题，单背包问题有多种不同的解法，其中最经典的是动态规划法 \cite{martello1999dynamic}和贪心法\cite{cmulec10}。
+这两种解法在各类算法教科书中都能轻易找到，因此不再赘述。
+设背包容量为$B$，可选择的物品数为$m$，则动态规划法的时间复杂度是$O(m\cdot B)$，近似比为1；
+贪心法的时间复杂度是$O(m \log{m})$，近似比为1/2。
+
+\section{GMSC的性能分析}
+\subsection{近似性能}
+\begin{theorem}\label{tm:gmscappr}
+    GMSC的近似比为$\frac{\mu}{1+\mu}$，其中$\mu$为单背包问题解法的近似比。
+\end{theorem}
+
+\begin{proof}
+令$Q_G$表示通过GMSC所覆盖的流，$G_l$表示GMSC在第$l$次迭代后所覆盖的流，则$Q_G = G_n$。
+令$X_l$代表第$l$次迭代中所选择的掩码带来的价值增量，则$X_l =w(G_l \backslash \bigcup\nolimits^{l-1}_{i=1}G_i)$。
+
+考虑GMSC已经完成$l-1$轮迭代的情况。在第$l$轮中，GMSC选择了交换机$v^l$和其上的流$X_l$。
+作为对比，最优解法也一定会从$v^l$中选择一个掩码的集合，其中包含的流的集合记为$O_l$。
+设最优解法最终覆盖的流的集合为$OPT$，则$OPT = \bigcup\nolimits_{l=1}^{n}O_l$。
+如果在这一轮，我们选择$O_l$而不是$X_l$的话，则这一轮的价值增量为$w(O_l \backslash \bigcup\nolimits^{l-1}_{i=1}G_i)$，记为${X'}_l$。
+
+设在已完成$l-1$轮的情况下，$v^l$上的背包问题的最优解是$Y_l$，则根据近似比的定义有$X_l \ge \mu Y_l$。
+又因为$Y_l$是当前情况下的短视最优解，故$Y_l \ge {X'}_l$。
+因而我们有：
+
+\begin{align}
+    X_l &\ge \mu Y_l \notag\\
+        &\ge \mu {X'}_l \notag\\
+        &= \mu \cdot w(O_l \backslash \bigcup\nolimits^{l-1}_{i=1}G_i) \notag\\
+        &\ge \mu \cdot w(O_l \backslash Q_G) \notag
+\end{align}
+
+根据$Q_D$和$OPT$的定义，有：
+\begin{align}
+    w(Q_D)&=\sum\nolimits_{l=1}^{n} X_l \notag\\
+        &\ge \sum\nolimits_{l=1}^{n} \mu \cdot w(O_l \backslash Q_D) \notag\\
+        &=  \mu \cdot \sum\nolimits_{l=1}^{n} w(O_l \backslash Q_D) \notag\\
+        &\ge \mu \cdot w ((\bigcup\nolimits_{l=1}^{n}O_l) \backslash Q_D) \notag\\
+        &=  \mu \cdot w( OPT \backslash Q_D) \notag\\
+        &\ge \mu \cdot [ w(OPT)-w(Q_D)] \notag
+\end{align}
+
+因而：
+\begin{equation}\label{eq:gmscappr}
+    w(Q_D) \ge \frac{\mu }{1+\mu} \cdot w(OPT)
+\end{equation}
+定理\ref{tm:gmscappr}得证。
+\end{proof}
+
+\section{时间复杂度}
+若单背包问题的解法的时间复杂度为$O(\rho)$，更新一个掩码的价值的时间复杂度为$O(\tau)$，则GMSC的时间复杂度为$O(n^2\cdot m \cdot \tau + n^2 \cdot \rho)$。
+
+假设一个掩码中最多有$h$个流，那么$\tau = h\cdot m$。因而：
+
+\begin{theorem}\label{tm:gmsctime}
+    GMSC的时间复杂度为$O(n^2\cdot m^2 \cdot h+ n^2 \cdot \rho)$。
+\end{theorem}
