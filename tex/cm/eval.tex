@@ -1,7 +1,10 @@
-\chapter{CountMax的仿真模拟与系统测试}
-%In this section, we first introduce the metrics and benchmarks for performance comparison. Then we implement CountMax, CountSketch and FSS, and run several sets of simulations on our software simulator.
-本章在模拟环境和基于Open vSwitch的测试系统环境下对CountMax的各方面性能进行评估。
-\section{仿真模拟}\label{sec:simulation}
+\section{CountMax的仿真模拟测试}\label{sec:simulation}
+本节中，我们使用仿真环境对CountMax的性能进行评测。
+
+\subsection{仿真环境}
+为了使用有限的资源模拟较大规模的网络环境，我们使用C\#语言编写了一个仿真程序，并实现了多种sketch。
+通过模拟数据包在交换机之间的传输，并将每个sketch实例分别与仿真环境中的虚拟交换机绑定，可以模拟交换机上的sketch处理数据包的过程。
+
 
 \subsection{测试指标与基准}\label{subsec:metric}
 在仿真模拟测试中，我们采用如下测试指标：
@@ -32,7 +35,7 @@
 在之前介绍过的4中sketch中，我们选择CountSketch \cite{charikar2004finding} 和 FSS \cite{homem2010finding}作为对比。
 Count-Min\cite{cormode2004improved}和SketchVisor\cite{huang2017sketchvisor}分别因为不能识别大流和计算负载过高而被排除。
 
-\subsection{仿真环境设置}\label{subsec:simulationsetting}
+\subsection{仿真参数设置}\label{subsec:simulationsetting}
 
 在仿真测试中，我们选择了两种典型且有广泛应用的网络拓扑结构。分别是Fat-tree \cite{al2008scalable}和Spine-Leaf \cite{alizadeh2013data}。
 其中的Fat-tree拓扑，我们设置为核心层有16个交换机、汇聚层和接入层分别有24个交换机。
@@ -50,14 +53,17 @@ Spine-Leaf拓扑则设置为27个“脊”交换机和54个“叶”交换机。
 
 \begin{figure}
     \centering
-    \includegraphics[width=\linewidth]{fig/hashheap.eps}
-    \caption{\textnormal{The hash-heap data structure}}
-    \label{fig:hashheap}
+    \includegraphics[width=0.6\linewidth]{fig/hashheap.pdf}
+    \caption{\textnormal{哈希堆结构的示意图}}
+	\label{fig:hashheap}
+	\note{图中流0的流量大小为20KB，流1的为75KB，流2的为5KB，流3的为180KB}
  \end{figure}
 
-除此之外，为了实现更加有意义的对比，我们还对CountSketch和FSS进行了改进。
+除此之外，为了让sketch之间的对比更加有意义，我们还对CountSketch和FSS进行了改进。
 
 在第\ref{chap:sketch}章中分析得出CountSketch和FSS在最坏情形下的更新操作的时间复杂度是$O(k)$。
+而根据第\ref{chap:countmax}章中的分析，CountMax的更新操作的时间复杂度仅有$O(d)$字节。
+由于$k$和$d$之间的数量级相差悬殊，可以预测CountMax的更新速度远远快于CountSketch和FSS。
 在此我们通过设计一种空间换时间的方法使得这两种sketch的时间复杂度降为$O(\log{k})$。
 图\ref{fig:hashheap}是我们所设计的数据结构的示意图。本文中将其称为“哈希堆”，用来代替CountSketch中的小根堆和FSS中的哈希表。
 哈希堆由一个哈希表和一个小根堆组成。其中哈希表的键是流的ID，值是指向小根堆中的元素的指针或索引。
@@ -109,59 +115,59 @@ FSS中，bitmap只有一行，每个格子包含两个计数器，因此FSS的�
 
 \subsection{仿真模拟结果}
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_k_appr_200000_099.eps}
+		\includegraphics[width=\linewidth]{fig/ft_k_appr_200000_099.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_k_appr_200000_099.eps}
+		\includegraphics[width=\linewidth]{fig/hy_k_appr_200000_099.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\caption{\textnormal{估计误差对比$k$。20万条流，$\alpha = 1\%$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:acc,k,20,1}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_k_appr_200000_095.eps}
+		\includegraphics[width=\linewidth]{fig/ft_k_appr_200000_095.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_k_appr_200000_095.eps}
+		\includegraphics[width=\linewidth]{fig/hy_k_appr_200000_095.pdf}
 	\end{minipage} \vspace{-0.6em}%
 	\caption{\textnormal{估计误差对比$k$。20万条流，$\alpha = 0.5\%$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:acc,k,20,5}
 \end{figure}
 
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_flow_appr_1000_099.eps}
+		\includegraphics[width=\linewidth]{fig/ft_flow_appr_1000_099.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_flow_appr_1000_099.eps}
+		\includegraphics[width=\linewidth]{fig/hy_flow_appr_1000_099.pdf}
 	\end{minipage}\vspace{-0.6em}
 	\caption{\textnormal{估计误差对比流数。$k=1000$，$\alpha = 1\%$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:acc,f,1000,1}
 \end{figure}
 
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_flow_appr_1000_095.eps}
+		\includegraphics[width=\linewidth]{fig/ft_flow_appr_1000_095.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_flow_appr_1000_095.eps}
+		\includegraphics[width=\linewidth]{fig/hy_flow_appr_1000_095.pdf}
 	\end{minipage}\vspace{-0.6em}
 	\caption{\textnormal{估计误差对比流数。$k=1000$，$\alpha = 0.5\%$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:acc,f,1000,5}
@@ -183,32 +189,32 @@ FSS中，bitmap只有一行，每个格子包含两个计数器，因此FSS的�
 当流数超过20万时，CountMax的平均估计误差几乎只有CountSketch和FSS的一半。
 
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_k_time_200000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_k_time_200000.pdf}
 		%\small{\caption\tiny{Algorithm Execution Time vs. $k$ with 200,000 flows} }
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_k_time_200000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_k_time_200000.pdf}
 		%\small{\caption\tiny{Algorithm Execution Time vs. $k$ with 200,000 flows} }
 	\end{minipage}\vspace{-0.6em}
 	\caption{\textnormal{Sketch运行时间与$k$。20万条流。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:time,k}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_flow_time_1000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_flow_time_1000.pdf}
 		%%\small{\caption{\textnormal{Algorithm Execution Time vs. The number of flows with fixed $k$=1,000}}}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_flow_time_1000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_flow_time_1000.pdf}
 		%%\small{\caption{\textnormal{Algorithm Execution Time vs. The number of flows with fixed $k$=1,000}}}
 	\end{minipage} \vspace{-0.6em}%
 	\caption{\textnormal{Sketch运行时间与流数。$k=1000$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
@@ -221,33 +227,34 @@ FSS中，bitmap只有一行，每个格子包含两个计数器，因此FSS的�
 图 \ref{fig:time,k} 和图 \ref{fig:time,f}印证了这些理论分析。
 $k$的变化对CountMax的运行时间几乎没有影响，而CountSketch和FSS的运行时间则随$k$的增长而增长。
 原因在于CountMax不需要维护额外的数据结构，从而避免了$O(\log{k})$的操作。
+需要强调的是，这组测试是在仿真模拟环境下进行的。实际应用中sketch的实现和仿真器中的实现有较大的不同，因而其计算负载也会和这组实验有所出入。
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_k_hit_200000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_k_hit_200000.pdf}
 		%%%\small{\caption{\textnormal{Elephant Flow Hit Rate vs. $k$ with 200,000 flows, top 0.5\% flows}}}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_k_hit_200000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_k_hit_200000.pdf}
 		%%%\small{\caption{\textnormal{Elephant Flow Hit Rate vs. $k$ with 200,000 flows, top 0.5\% flows}}}
 	\end{minipage} \vspace{-0.6em}%
 	\caption{\textnormal{大流识别率与$k$。20万条流。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:hit,k,20}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_flow_hit_1000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_flow_hit_1000.pdf}
 		%%\small{\caption{\textnormal{Elephant Flow Hit Rate vs. The number of flows with fixed $k$=1,000, top 0.5\% flows}}}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_flow_hit_1000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_flow_hit_1000.pdf}
 		%%\small{\caption{\textnormal{Elephant Flow Hit Rate vs. The number of flows with fixed $k$=1,000, top 0.5\% flows}}}
 	\end{minipage} \vspace{-0.6em}%
 	\caption{\textnormal{大流识别率与流数，$k=1000$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
@@ -261,16 +268,16 @@ CountSketch和FSS使用哈希堆存储大流的ID，因此它们能追踪的流�
 
 
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_k_load_200000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_k_load_200000.pdf}
 		%%\small{\caption{\textnormal{Average Link Load vs. $k$ with 200,000 flows} }}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_k_load_200000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_k_load_200000.pdf}
 		%%\small{\caption{\textnormal{Average Link Load vs. $k$ with 200,000 flows} }}
 	\end{minipage}\vspace{-0.6em}
 	\caption{\textnormal{最大链路负载率与$k$。20万条流。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
@@ -278,16 +285,16 @@ CountSketch和FSS使用哈希堆存储大流的ID，因此它们能追踪的流�
 \end{figure}
 
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_flow_load_1000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_flow_load_1000.pdf}
 		%%\small{\caption{\textnormal{Average Link Load vs. The number of flows with fixed $k$=1,000}}}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_flow_load_1000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_flow_load_1000.pdf}
 		%%\small{\caption{\textnormal{Average Link Load vs. The number of flows with fixed $k$=1,000}}}
 	\end{minipage} \vspace{-0.6em}%
 	\caption{\textnormal{最大链路负载率与流数。$k=1000$。\textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
@@ -303,29 +310,29 @@ CountSketch和FSS使用哈希堆存储大流的ID，因此它们能追踪的流�
 网络中的流越多，sketch能追踪的大流的比例就越少，因而链路负载率就更高。
 从这一组模拟可以看出，三种sketch在用于重路由时，有着几乎完全相同的性能。
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_k_hh_1000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_k_hh_1000.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_k_hh_1000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_k_hh_1000.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\caption{\textnormal{Heavy hitter估计误差与$k$。$\delta=10^{-3}$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:hh,k,1000}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/ft_k_hh_10000.eps}
+		\includegraphics[width=\linewidth]{fig/ft_k_hh_10000.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/hy_k_hh_10000.eps}
+		\includegraphics[width=\linewidth]{fig/hy_k_hh_10000.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\caption{\textnormal{Heavy hitter估计误差与$k$。$\delta=10^{-3}$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:hh,k,10000}
@@ -338,47 +345,47 @@ CountSketch和FSS使用哈希堆存储大流的ID，因此它们能追踪的流�
 总而言之，在测量heavy hitter上，CountMax的性能略优于CountSketch和FSS。
 
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/half_eg_099_k.eps}
+		\includegraphics[width=\linewidth]{fig/half_eg_099_k.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/half_eg_095_k.eps}
+		\includegraphics[width=\linewidth]{fig/half_eg_095_k.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\caption{\textnormal{平均估计误差与$k$。20万条流，Spine-Leaf。 \textit{左图}： Top 1\%; \textit{右图}： Top 0.5\%.}}
 	\label{fig:coop,acc,k}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/half_eg_099_k.eps}
+		\includegraphics[width=\linewidth]{fig/half_eg_099_flow.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\begin{minipage}[t]{0.49\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/half_eg_095_k.eps}
+		\includegraphics[width=\linewidth]{fig/half_eg_095_flow.pdf}
 	\end{minipage}\vspace{-0.6em}%
 	\caption{\textnormal{平均估计误差与流数。$k=1000$，Spine-Leaf。 \textit{左图}： Top 1\%; \textit{右图}： Top 0.5\%.}}
 	\label{fig:coop,acc,flow}
 \end{figure}
 
-\begin{figure}[!t]
+\begin{figure}[ht]
 	\centering
 	\begin{minipage}[t]{0.48\linewidth}		
-		%\begin{figure}[!t]
+		%\begin{figure}[ht]
 		\centering
-		\includegraphics[width=\linewidth]{fig/half_eg_time_k.eps}
+		\includegraphics[width=\linewidth]{fig/half_eg_time_k.pdf}
 		\caption{\textnormal{最大运行时间与$k$。20万条流，Spine-Leaf。}}
 		\label{fig:coop,time,k}
 		%\end{figure}
 	\end{minipage}\vspace{-0.6em}\hspace{0.4em}
 	\begin{minipage}[t]{0.48\linewidth}
 		\centering
-		\includegraphics[width=\linewidth]{fig/half_eg_time_flow.eps}
+		\includegraphics[width=\linewidth]{fig/half_eg_time_flow.pdf}
 		\caption{\textnormal{最大运行时间与流数。$k=1000$，Spine-Leaf。}}
 		\label{fig:coop,time,flow}
 	\end{minipage}\vspace{-0.6em}

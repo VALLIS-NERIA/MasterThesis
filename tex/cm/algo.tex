@@ -1,7 +1,18 @@
-\chapter{CountMax的算法设计与分析}\label{chap:countmax}
-本章将会详细介绍CountMax的算法细节，以及它的性能分析。
 
-\section{统计信息记录}
+
+\section{算法设计}
+首先我们确定CountMax算法设计的目标，然后再来介绍算法的具体设计。
+CountMax的算法设计包含两部分，其一为统计信息的记录和更新，其二为统计信息的查询。
+
+\subsection{设计目标}
+根据第\ref{chap:sketch}章中对已有的sketch方案的分析，为了解决已有sketch的不足，CountMax的设计目标有以下几点：
+\begin{enumerate}
+	\item 大流识别。在实际应用中我们很难获得关于大流的先验知识，因此CountMax必须负责将大流的ID从成千上万的流当中识别出来。
+	\item 更低的计算负载。CountMax应当占用尽可能少的CPU资源，一方面可以应对更重的网络负载，另一方面也为交换机上的其它应用留出了空间。
+	\item 较低的测量误差。CountMax对大流流量的估算误差应当可控，且处于可接受的较低范围内。
+	\item 追踪更多的大流。在消耗同样的存储空间的前提下，被CountMax所追踪的大流越多，就可以提供越多的有用信息，提升重路由等应用的质量。
+\end{enumerate}
+\subsection{统计信息记录}
 
 为了记录统计信息，我们维护一个有$d$行、$w$列的bitmap。
 Bitmap中的每个格子包含两个字段：$Key$和$Counter$。参数$d$和$w$的意义将在后文讨论。
@@ -40,11 +51,7 @@ Bitmap中的每个格子包含两个字段：$Key$和$Counter$。参数$d$和$w$
 
 对bitmap中的每一行迭代上述过程。算法\ref{alg:count_max}详细描述了这一算法。
 
-
-
-%sending counter arrays to controller, which combines all arrays into one, queries made at the controller
-
-\section{流量信息查询}
+\subsection{流量信息查询}
 %\input{query.tex}
 要查询流$f_i$的统计信息，首先从每一行中分别查询。对于sketch中的第$j$行，采用如下的方法获取$f_i$在当前行内的估计$\hat{a}_{i_{j}}$：
 \begin{equation}
@@ -66,13 +73,12 @@ Counter_{j}[h_j(f_i)]&\text{, if $f_i=Key_{j}[h_j(f_i)]$}\\
 \label{subsec:analysis}
 %\input{analysis.tex}
 
-CountMax具有找出大流的能力。在分析CountMax的具体性能之前，先给“大流”下一个定义。
+CountMax具有找出大流的能力。在分析CountMax的具体性能之前，首先对“大流”进行定义。
 在网络中，随着流量分布的变化，字面意义上的top-$k$，即网络中流量最大的$k$条流的特征很难量化。因此，我们采用“Heavy Hitter”作为大流的定义。
-
 
 给定网络中的所有流的集合，其中总共有$n$条流，所有流的流量之和是$F$。给定一个参数$\delta$ （$0<\delta \le 1$），则每一条流量大于或等于$\delta\cdot F$的流就称为这个集合中的$\delta$-``heavy hitter"。
 
-
+\subsection{近似性能分析}
 本小节将证明，在一定概率内，CountMax可以对heavy hitter的估计值有着可控的近似比。
 
 \begin{theorem}
@@ -134,9 +140,9 @@ E(X_{i,j})\le \frac{1}{w}\sum_{k=1}^{n}a_k\le \frac{1}{w}\cdot \frac{a_i}{\delta
 \begin{align}\notag
 &Pr[\hat{a}_i< a_i-\frac{e}{w}\cdot\frac{a_i}{\delta}]\\\notag
 &=Pr[\forall j, Counter[h_j(f_i)]<a_i-\frac{e}{w}\cdot\frac{a_i}{\delta} ]\\\notag
-&\le Pr[\forall j, a_i-X_{i,j} <a_i-\frac{e}{w}\cdot\frac{a_i}{\delta} ] \text{ (根据不等式\eqref{eq:ai_xij})}\\\notag
+&\le Pr[\forall j, a_i-X_{i,j} <a_i-\frac{e}{w}\cdot\frac{a_i}{\delta} ] \text{ （根据不等式\eqref{eq:ai_xij}）}\\\notag
 &=Pr[\forall j, X_{i,j} > \frac{e}{w}\cdot\frac{a_i}{\delta} ]\\\notag
-&\le Pr[\forall j, X_{i,j}>e\cdot E(X_{i,j})]\text{ (Markov inequality)}\\\notag
+&\le Pr[\forall j, X_{i,j}>e\cdot E(X_{i,j})]\text{\ \ （根据马尔可夫不等式）}\\\notag
 &<e^{-\tilde{d}}
 \end{align}
 	
@@ -169,7 +175,7 @@ Pr[\frac{\hat{a}_i}{a_i} \ge 1-\frac{e}{w\cdot \delta}]\ge 1-e^{-\tilde{d}}
 由于bitmap中的每一行是独立的，因此$E[\tilde{d}]\ge d\cdot(1-\frac{1}{w\cdot\delta})$。
 \end{proof}
 
-最后对CountMax的时间复杂度进行分析。
+\subsection{时间复杂度分析}
 由于每一行的操作是固定的一次哈希、一次比较、一次加法，因而每行的时间复杂度是$O(1)$。
 CountMax总共有$d$行，所以：
 \begin{theorem}\label{tm:time}

@@ -1,6 +1,14 @@
 %\chapter{CountMax：数据平面的流量测量工具}
-\input{tex/cm/background.tex}
+% \input{tex/cm/background.tex}
+
+\chapter{CountMax：轻量级的流量测量sketch}\label{chap:countmax}
+本章首先说明CountMax的设计目标，紧接着详细介绍CountMax的算法细节、性能分析以及CountMax的应用，随后通过仿真模拟和系统集成测试对CountMax和其它两种sketch的综合性能进行对比。
 \input{tex/cm/algo.tex}
 \input{tex/cm/coop.tex}
 \input{tex/cm/eval.tex}
 \input{tex/cm/proto.tex}
+
+\section{小结}
+本章首先确定了CountMax的设计目标，随后提出了CountMax的算法，通过数学上的分析证明了CountMax的测量误差的有界性以及CountMax在时间复杂度上的优越性，并介绍了CountMax在重路由中的应用和协作式部署。
+其次，通过仿真模拟和系统集成测试，详尽评测了CountMax与CountSketch和FSS之间的性能差异。
+测试结果显示CountMax能够降低约一半的计算负载，而无需牺牲任何测量精度。

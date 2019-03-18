@@ -1,6 +1,10 @@
-\chapter{最大化流统计覆盖问题（MSC）}
-本章我们详细讨论流统计部署问题的目标，并给出最大化流统计覆盖问题的定义。
-\section{问题建模}
+% \chapter{最大化流统计覆盖问题（MSC）}
+% 本章我们详细讨论流统计部署问题的目标，并给出最大化流统计覆盖问题的定义。
+
+
+\section{流量测量分布式部署问题的形式化}
+
+本节首先对问题中的网络和流量统计进行建模，确定流量测量分布式部署问题的限制和优化目标，从而得到具体的数学问题，最后用形式化语言描述该问题。
 
 \subsection{网络模型}
 假定一个SDN中包含了一个集中式的控制器，以及一组交换机，定义其集合为$V=\{v_1, ..., v_n\} $，其中$ n = |V| $。
@@ -11,14 +15,16 @@
 \subsection{流量统计的代价与收益}
 在第\ref{chap:sketch}章中，我们讨论了流量统计的代价主要是计算负载。
 而在流量统计部署问题中，计算负载只和要处理的数据包数相关，因而流量统计的代价就是要处理的数据包的数量。
-在没有关于流的先验知识的条件下，要寻找更多的大流，只能采用广撒网的方式。
-因而流量统计中的收益就是可以统计到的流的数量。
 
 由于流统计部署是在流发出之前进行的，因此一定程度的先验知识是必要的。
-假设预先知道所有流的信息和流量是不切实际的，但是对有规律的一组流的预测是可行的。
-根据一定的规则将网络中的流划分为不同的部分，如依据源或目的端的类型、所述的服务器集群等，每一部分称之为一个掩码（wildcard）\cite{xu2017miniming}。
-依靠过去的统计经验，可以对经由交换机上的每个掩码进行一定程度的预测，包括总数据流量、流数以及可能的大流的数量。
-由此，我们可以估算每个掩码给交换机带来的代价和收益。
+我们可以根据一定的规则将网络中的流划分为不同的部分，如依据源或目的端的类型、所述的服务器集群等，每一部分称之为一个掩码（wildcard）\cite{xu2017miniming}。
+一个掩码可以同时分配给多个交换机，每个交换机所经过的流的集合和掩码中的流的集合形成一个交集，称为“子掩码”。交换机关注的是子掩码的代价和收益。
+依靠过去的统计数据和经验，可以对交换机上的每个子掩码进行一定程度的预测，包括总数据流量、流数以及可能的大流的数量。
+由此，我们可以按照一定规则估算每个掩码给交换机带来的代价和收益。
+通常情况下我们可以规定代价为总数据流量，收益为预期的大流数量，或者代价和收益都是总数据流量。
+如果某台交换机中某个子掩码的某条流在另一台交换机上被测量了，那么这条流所带来的收益也会对应地被除去。
+
+因而，流量测量分布式部署问题的限制是每个交换机上激活的掩码的代价之和不超过交换机的计算负载上限，优化目标是所有交换机上所有激活的子掩码的收益之和。
 
 % 由于问题讨论的是事前部署，因此流量统计的代价与收益要分为有先验知识和无先验知识分别讨论。
 
@@ -45,7 +51,7 @@
 
 
 
-\section{最大化流统计覆盖问题的定义}\label{sec:mscdef}
+\subsection{最大化流统计覆盖问题（MSC）}\label{sec:mscdef}
 我们将所有流划分为$m$个掩码，记为一个集合$\Omega=\{r_1,r_2,...,r_m\}$，其中$m = |\Omega|$。
 其中每一个掩码都是若干条流的集合。在某台交换机上“激活”该掩码，则该掩码中的流在途经这台交换机时就会被测量。
 对于交换机$v_i$而言，记所有经过$v_i$的流的集合为$\Pi_i$，其中属于掩码$r_j$的部分记为$\Pi^j_i$。
@@ -54,7 +60,7 @@
 2. 互斥性，即$\Pi^{j_1}_i \cap \Pi^{j_2}_i = \Phi, \forall r_{j_1} \neq r_{j_2}, \forall v_i \in V$。
 
 我们已知每个掩码在每个交换机上的代价和收益，分别记为$c(\Pi^j_i)$和$w(\Pi^j_i)$。
-特别注意的是，$c(\Pi^j_i)$是固定的，$w(\Pi^j_i)$则不是。
+特别注意的是，对给定的$j$和$i$而言，$c(\Pi^j_i)$是固定的，$w(\Pi^j_i)$则不是。
 如果$\Pi^j_i$当中的某条流恰好已经被其它交换机所测量，那么$w(\Pi^j_i)$就会相应地减少，因为对一条流进行重复测量是没有意义的。
 每个交换机有一个代价上限，对应其CPU资源的限制，记为$B_i$。
 每个交换机上被激活的掩码的代价之和不能超过$B_i$。
@@ -107,22 +113,23 @@ x^j_{i}\in \left\{ {0,1} \right\} &,   \forall v_i,r_j  \\
 \end{proof}
 
 
-\section{MSC与已存在问题的区别}\label{sec:differenceproblem}
+\subsection{MSC与已存在问题的区别}\label{sec:differenceproblem}
 
-MSC问题与一些已被讨论过的问题有着相似之处，如“maximum coverage problem”\cite{khuller1999budgeted}或者“maximum coverage problem with group budget constraints”\cite{chekuri2004maximum}。
+MSC问题与一些已被讨论过的问题有着相似之处，如“Maximum Coverage Problem”\cite{khuller1999budgeted}或者“Maximum Coverage Problem with Group Budget Constraints”\cite{chekuri2004maximum}。
 接下来我们讨论MSC与这些问题的不同之处
 
-\subsection{Budgeted Maximum Coverage (BMC)\cite{khuller1999budgeted}}
+\subsubsection{Budgeted Maximum Coverage (BMC)\cite{khuller1999budgeted}}
 给定一个集合$X$，其中的每个元素称为一个“物品”，并分别具有价值。
-$\mathds{S}=\{S_1,S_2,...,S_p\}$是一个集合的集合，其中每个元素$S_j$都是$X$的子集，并且具有一个代价$c(S_j)$。
-BMC问题给定一个总代价上限$\mathds{C} $，寻找集合$\mathds{S}$的一个子集$\mathds{S}'$，使得其中的代价之和不超过$\mathds{C} $，而覆盖的物品的价值最大。
+$\mathds{S}=\{S_1,S_2,...,S_p\}$是一个集合的集合，其中每个元素$S_j$都是$X$的一个子集，并且具有一个代价$c(S_j)$。
+
+BMC问题给定一个总代价上限$\mathds{C} $，寻找集合$\mathds{S}$的一个子集$\mathds{S}'$，使得其中所有元素的代价之和不超过$\mathds{C} $，而这些元素的并集所覆盖的物品的价值总和最大。
 
 \textbf{MSC问题与BMC问题的区别：} 
 BMC当中每个选中的$S_i$都被放在一个“组”中，并且也只有一个总的代价上限。
 而MSC中每个交换机都相当于一个“组”，且每“组”都有独立的代价上限。
 
 
-\subsection{Maximum Coverage with Group Budget Constraints (MCG)\cite{chekuri2004maximum}}\label{def:mcg}
+\subsubsection{Maximum Coverage with Group Budget Constraints (MCG)\cite{chekuri2004maximum}}\label{def:mcg}
 给定一个集合$X$，其中的每个元素称为一个“物品”，并分别具有价值。
 $\mathds{S}=\{S_1,S_2,...,S_p\}$是一个集合的集合，其中每个元素$S_j$都是$X$的子集，并且具有一个代价$c(S_j)$。
 给定$l$个集合$G_1,G_2,...,G_l$，其中每个$G_i$都是$\mathds{S}$的子集，称为一个组。

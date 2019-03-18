@@ -1,25 +1,23 @@
 %!TEX encoding = UTF-8 Unicode
 %!TEX program = latexmk
 
-\documentclass[master]{ustcthesis}
+\documentclass[master,professional]{ustcthesis}
 % doctor|master|bachelor [academic|professional] [chinese|english] [print|pdf]
 % [super|numebers|authoryear]
 
-\title{中国科学技术大学\\学位论文模板示例文档}
+\title{软件定义网络轻量级sketch测量与分布式部署研究}
 \author{于希文}
 \major{软件工程}
-\supervisor{徐宏力\ 副教授}
+\supervisor{徐宏力}
 % \date{二〇一七年五月一日} % 注释掉则为今日
 \professionaltype{专业学位类型}
 % \secretlevel{秘密}        % 绝密|机密|秘密，注释本行则不保密
 % \secretyear{20}           % 保密年限
 
-\entitle{An example of thesis template for University of Science and Technology
-  of China}
-\enauthor{Zeping Li}
-\enmajor{Mathematics and Applied Mathematics}
-\ensupervisor{Prof. Luogeng Hua}
-\encosupervisor{Prof. Xuesen Qian}
+\entitle{Lightweight Sketch Measurement and Distributed Deployment for Software-Defined Networks}
+\enauthor{Xiwen Yu}
+\enmajor{Software Engineering}
+\ensupervisor{Hongli Xu}
 % \endate{May 1, 2017}      % Today if commented
 % \enprofessionaltype{Professional degree type}
 % \ensecretlevel{Secret}    % Top secret|Highly secret|Secret
@@ -56,6 +54,7 @@
 % \input{chapters/notation}
 
 \mainmatter
+\input{tex/intro.tex}
 \input{tex/background.tex}
 \input{tex/cm.tex}
 \input{tex/msc.tex}
@@ -64,10 +63,9 @@
 \bibliography{bib/ustc}
 
 \appendix
-\chapter{论文规范}
 
 \backmatter
-\input{chapters/acknowledgements}
-\input{chapters/publications}
+\input{tex/acknowledgements}
+\input{tex/publications}
 
 \end{document}

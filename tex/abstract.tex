@@ -1,1 +1,56 @@
-\chapter{摘要}
+\begin{abstract}
+软件定义网络（SDN）是新一代的网络架构。
+通过将控制层与数据层分离，SDN能够对网络进行细粒度优化，从而提高资源利用效率，适应迅猛发展的互联网业务。
+在SDN中，流量统计信息对网络优化十分重要，如重路由、攻击检测等。
+然而，SDN交换机中的部分硬件资源十分有限，如TCAM、SRAM的存储资源以及CPU的计算资源。
+随着网络中流量的增加，传统的基于流表的测量方法和基于采样的测量方法由于受这些资源的限制，无法继续保证测量精度。
+因此，基于sketch的测量方法走进视野。
+
+Sketch可以利用很少的存储空间来找出特定种类的流，以及它们的流量统计信息。
+而网络中的最大的若干条流（top-$k$）的流量统计信息是最为重要的，因此能够测量top-$k$的sketch受到了更多关注。
+然而，根据分析，当网络负载较大的时候，现有的若干种sketch会占用过多的CPU计算资源。
+过多消耗CPU计算资源有可能会影响交换机的基础功能，如流表的插入和修改等。
+为了解决CPU计算资源不足的问题，我们从数据平面和控制平面分别入手。
+在数据平面，我们可以通过设计更加轻便快速的sketch来降低计算负载。
+在控制平面，我们则可以通过分布式部署的方法，让交换机只测量一部分数据包，减少不同交换机重复测量同一条流的情况，从而在不牺牲测量精度的情况下降低计算负载。
+
+% 在网络中流量不断增大的情况下，让交换机测量所有经过的数据包势必会加大计算负载并导致测量的冗余。
+
+
+本文的第一部分着眼于数据平面，提出了一种基于哈希碰撞的新型轻量级sketch，命名为CountMax。
+它能够在网络中找出top-$k$的流ID，并测量这些大流的流量。
+和已有的sketch相比，CountMax在理论上拥有更低的时间复杂度，以及有界的测量精度。
+我们还讨论了使用CountMax进行流重路由，以及进一步降低计算负载的CountMax的协作式部署。
+实验结果显示，CountMax的测量精度和已有的sketch持平或者略高，计算负载比已有的sketch减少了约50\%。
+
+本文的第二部分聚焦于控制平面，讨论了流量测量在网络中的分布式部署问题。
+通过问题的建模和形式化，我们提出了一个基于贪心法实现最大流统计覆盖的算法，称为GMSC。
+控制器使用GMSC为每个交换机生成规则，交换机上只需对符合规则的流进行测量。
+我们在理论上证明了GMSC算法的有效性。并使用仿真模拟测试了GMSC+CountMax的性能。
+测试结果显示，与协作式部署相比，使用GMSC的部署方案可以提升约20\%的测量精度，同时将交换机负载减少约30\%。
+最后，本文还在Open vSwitch平台上实现了CountMax和GMSC，证明了本文研究成果的可行性。
+
+\keywords{软件定义网络；流量测量；Sketch；优化算法}
+\end{abstract}
+
+\begin{enabstract}
+By separating the control plane and the data plane, an SDN can provide fine-grained management and optimize the network resource utilization. 
+Statistics information is of vital importance for different applications in SDNs, such as traffic engineering, flow rerouting, and attack detection. 
+Since some resources, e.g., TCAM, SRAM and computing capacity, are often limited on SDN switches, traffic measurements based on flow tables or sampling become infeasible. 
+Sketches can find out flows of specified type along with their traffic statistics using little memory. 
+Although many efficient sketches have been designed, our analysis shows that existing sketch-based measurement solutions may suffer from severe computing overhead on switches especially under high traffic load, which significantly interferes with switch's basic functions, such as flow rule setup and modification. 
+%Moreover, as the network traffic keeps growing, measuring every packet in every switch brings more redundant computing overhead.
+In order to reduce the computing overhead, we can introduce a faster sketch to data plane, and use distributed deployment in the control plane to decrease the redundancies of measurement.
+
+In the first part of the paper, we focus on the data plane and present CountMax, a lightweight sketch for traffic measurement, which can find out the top-$k$ elephant flows and their traffic sizes. 
+Compared with existing sketches, CountMax has lower time complexity in theory and bounded measurement error. 
+We also discuss CountMax-based flow rerouting and cooperative deployment of CountMax. 
+According to the results of testbed experiments and simulations, compared with existing sketches, CountMax reduces computing overhead by about 1/2 and has the same or lower estimation error.
+
+In the second part, we introduce the traffic measurement deployment problem and propose a greedy algorithm of the Maximum Statistics Coverage problem, named GMSC, and analyze its approximation performance. 
+GMSC generates rules for every switch, so that each switch only needs to measure flows that meets the rules.
+As the simulations show, deploying sketches using GMSC can further reduce the computing overhead per switch by about 30\%, and achieve higher measurement accuracy, by about 20\%. 
+At last, we implement CountMax and GMSC in Open vSwitch to prove the feasibility of our work.
+
+\enkeywords{Software Defined Networks; Traffic Measurement; Sketch; Optimization Algorithm}
+\end{enabstract}

@@ -1,7 +1,6 @@
-\chapter{CountMax的应用}
-
-
-\section{借助CountMax进行重路由}\label{sec:flowrerouting}
+\section{CountMax在SDN中的应用}
+本节介绍使用CountMax在SDN中进行重路由的应用，还提出了一种协作式的部署方式。
+\subsection{借助CountMax进行重路由}\label{sec:flowrerouting}
 流的重路由对于许多实际应用都是必要且十分重要的，如链路负载均衡以及链路中断时的重新寻路\cite{xu2017incremental}
 。对于这些应用，网络中的大流的流量统计信息更加重要\cite{xu2017scalable}。
 
@@ -18,12 +17,12 @@
 % \section{近似性能和计算负载的初步模拟}
 % 小节\ref{sec:analysis}中的分析当中多次使用了不等式缩放、马尔可夫不等式，因此最终得到的结论颇为宽松。
 % 为了更清楚的了解CountMax的实际性能，我们用C语言实现了CountMax并进行了一系列模拟。关于模拟环境的详细介绍请参见第XXXX章。
-\begin{figure}[!h]
+\begin{figure}[h]
 	\centering
 	\begin{minipage}[t]{0.48\linewidth}		
 		%\begin{figure}[!t]
 		\centering
-		\includegraphics[width=\linewidth]{fig/cm_d_err.eps}
+		\includegraphics[width=\linewidth]{fig/cm_d_err.pdf}
 		\caption{\textnormal{CountMax近似误差与$d$的关系}}
 		\label{fig:cm,d,acc}
 		%\end{figure}
@@ -31,29 +30,28 @@
 \hspace{0.4em}
 	\begin{minipage}[t]{0.48\linewidth}
         \centering
-		\includegraphics[width=\linewidth]{fig/cm_d_cpu.eps}
+		\includegraphics[width=\linewidth]{fig/cm_d_cpu.pdf}
 		\caption{\textnormal{CountMax处理一个数据包的平均CPU周期数}}
 		\label{fig:cm,d,cpu}
 	\end{minipage}\vspace{-0.6em}
 \hspace{0.1em}
 \end{figure}
 
-\section{CountMax的协作式部署}\label{sec:coop}
+\subsection{CountMax的协作式部署}\label{sec:coop}
 要进一步降低CountMax在交换机上的计算负载，主要有两种方法。第一种方法是通过减少$d$的值，也就是CountMax的行数。
 
 图\ref{fig:cm,d,acc}描述了CountMax在不同的行数下，对网络中前1\%或0.5\%的流的流量估计的误差。
-关于测试环境的具体介绍请参见第XXXX章。图\ref{fig:cm,d,acc}中的测试对应的是其中Spine-Leaf拓扑、20万条流、$k=2000$、非协作式的情况。
+关于测试环境的具体介绍请参见第\ref{sec:simulation}节。图\ref{fig:cm,d,acc}中的测试对应的是其中Spine-Leaf拓扑、20万条流、$k=2000$、非协作式的情况。
 由图中我们可以看到，随着$d$的增长，估计误差一开始迅速降低，但随后降低的速度大幅放缓。$d=3$时的误差和$d=10$时的误差差别很小。
 当$d=2$时，误差已经控制在10\%以内。
 
 图\ref{fig:cm,d,cpu}描述了CountMax处理数据包所需的CPU时钟周期随$d$的变化而变化的情况。
 图中的结果显示，CountMax的处理一个包的计算负载和$d$大致呈线性增长，同时印证了定理\ref{tm:time}。
 
-
 \begin{figure}[h]
    \centering
-   \includegraphics[width=\linewidth]{fig/filter_measure.eps}
-   \caption{Illustration of the Cooperative Measurement Framework}
+   \includegraphics[width=0.7\linewidth]{fig/filter_measure.pdf}
+   \caption{协作式CountMax的示意图}
    \label{fig:filtermeasurement}
 \end{figure}
 
@@ -64,6 +62,8 @@
 每当一个数据包抵达交换机时，交换机首先用一个哈希函数对流的ID进行哈希。这个哈希函数是所有交换机所共享的。
 如果哈希的结果是奇数，那么这条流应当被它的入口交换机，也就是路由上的第一个交换机进行测量。反之则被出口交换机所测量。
 交换机可以通过这条流的入端口和出端口来判断自己是不是入口交换机或者出口交换机。
+
+协作式CountMax是一种简易的部署方式。和第\ref{chap:gmsc}章中介绍的分布式部署方式不同，协作式CountMax是完全自组织的，无需控制平面的介入。
 
 接下来分析协作式CountMax的估计误差。不失一般性，我们假设网络中只有两个交换机。网络中的所有流都是先经过交换机1，再经过交换机2的。
 假设所有流的总流量是$F$，交换机1处理的流量占比是$\gamma_1 $，那么它处理的总流量就是$F_1 =\gamma_1\cdot F $。
@@ -82,21 +82,7 @@
 \right.
 \end{equation}
 
-其中$\gamma_x$ 根据这条流被哪个交换机所测量，而代表 $\gamma_1$ 或 $\gamma_2$。如果定义 $\gamma_m = \max \{\gamma_1, \gamma_2\}$，用$\gamma_m$替换$\gamma_x$，即可得到一个下界。在最好的情况下，$\gamma_1=\gamma_2=1/2$。在实际情况中，通过选择足够随机的哈希函数，$\gamma_1$ 和 $\gamma_2$通常都会比较接近。参照等式\eqref{eq:coop_acc}, 协作式CountMax将$\frac{\hat{a}_i}{a_i}$ 和 $E[\tilde{d}]$ 这两个值的界缩紧为原本的 $\gamma_m $倍。
-
-
-
-
-
-%\section{CountMax-Based Hierarchical Heavy Hitters (HHH)}
-
-%If a flow $f$ has destination host of IP address 10.11.12.13, it has different keys in different levels. For the 1st level the key of $f$ is 10.0.0.0, for the 2nd level it's 10.11.0.0, and so on.
-
-%As an extension of Heavy Hitters, Hierarchical Heavy Hitters (HHH) is to find out the heavy hitters in different levels of a hierarchical model. For example, we can classify flows according to subnets of the destination host, and there can be multi levels of subnets. More specificity, suppose there are 4 levels, denoted by level 0 to level 3, and the subnet mask is 255.255.255.255 for level 0, 255.255.255.0 for level 2, and so on. For level 0, it directly deals with flows; For higher levels, they deal with sets of flows, according to the subnets that flows belong to. Given a threshold $\delta$, for level 0, the hierarchical heavy hitters are just the heavy hitter flows. For the $i$th level ($i>0$), it's a bit more complex.
-
-%As mentioned before, the higher levels deal with flow sets instead of flows. For the $i$th level ($i>0$), the weight of a flow set $s$ is defined as the sum of traffic of flows, where each flow satisfies: the flow belongs to $s$, but does not belong to any HHH of lower levels.
-
-%Authors of \cite{cheung2006finding} have discussed the implementation of general HHH based on Count-Min. However, Count-Min cannot find out HHH flows since it doesn't record flow keys. Suppose that there are $g$ levels of hierarchies. To solve the HHH problem, we need to keep $g$ CountMax sketches, denoted by $C_1, ... ,C_g$, where $C_i$ corresponds the $i$th hierarchical level from top to bottom.
-
-%When a packet arrives, for every level $i \in \{1, ..., g\}$, we first calculate the level-specified key $key_{i}$. In the previous example, if a flow $f$ has destination host of IP address 10.11.12.13, its $key_0$ is 10.11.12.13, $key_1$ is 10.11.12.0, $key_2$ is 10.11.0.0, and $key_3$ is 10.0.0.0. Then we update $C_{i}$ using $key_{i}$ as the key. To find out heavy hitters of every hierarchy level, we just iterate the CountMax sketches from $C_g$ to $C_1$, and figure out the result according to the definition of HHH.
-
+其中$\gamma_x$ 根据这条流被哪个交换机所测量，而代表 $\gamma_1$ 或 $\gamma_2$。如果定义 $\gamma_m = \max \{\gamma_1, \gamma_2\}$，用$\gamma_m$替换$\gamma_x$，即可得到一个下界。
+在最好的情况下，$\gamma_1=\gamma_2=1/2$。
+在实际情况中，通过选择足够随机的哈希函数，$\gamma_1$ 和 $\gamma_2$通常都会比较接近。
+参照等式\eqref{eq:coop_acc}, 协作式CountMax将$\frac{\hat{a}_i}{a_i}$ 和 $E[\tilde{d}]$ 这两个值的界缩紧为原本的 $\gamma_m $倍。

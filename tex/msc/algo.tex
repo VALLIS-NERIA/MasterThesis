@@ -1,7 +1,9 @@
-\chapter{GMSC：流统计覆盖的解决算法}\label{chap:gmsc}
-在本章，我们提出一个简单但有效的算法解决MSC问题，称为GMSC。
+\section{MSC问题的贪心解法：GMSC}\label{sec:gmscsec}
+本节我们提出一个简单但有效的算法解决MSC问题，称为GMSC。
 
-\section{算法设计}\label{sec:gmsc}
+
+
+\subsection{算法设计}\label{sec:gmsc}
 如第\ref{sec:mscdef}节中定理\ref{thm:nphard}的证明，在只考虑交换机$v_i$的情况下，MSC问题退化为单背包问题。
 我们可以对每个交换机分别求解单背包问题，获得每个交换机的最大容纳价值，记为$p(v_i)$。
 接下来选择$p(v_i)$最大的那个交换机，将背包问题的解应用到此交换机上。
@@ -30,24 +32,27 @@
         }
     }
     \caption{GMSC}
-    \label{alg:count_max}
+    \label{alg:gmsc}
 \end{algorithm}
 
-\section{单背包问题的解法}
+\subsection{单背包问题的解法}
 作为一个经典问题，单背包问题有多种不同的解法，其中最经典的是动态规划法 \cite{martello1999dynamic}和贪心法\cite{cmulec10}。
-这两种解法在各类算法教科书中都能轻易找到，因此不再赘述。
+这两种解法早已写入算法教科书中，因而在此不再赘述。
 设背包容量为$B$，可选择的物品数为$m$，则动态规划法的时间复杂度是$O(m\cdot B)$，近似比为1；
 贪心法的时间复杂度是$O(m \log{m})$，近似比为1/2。
 
-\section{GMSC的性能分析}
-\subsection{近似性能}
+\subsection{GMSC的性能分析}
+\subsubsection{近似性能}
 \begin{theorem}\label{tm:gmscappr}
     GMSC的近似比为$\frac{\mu}{1+\mu}$，其中$\mu$为单背包问题解法的近似比。
 \end{theorem}
 
 \begin{proof}
 令$Q_G$表示通过GMSC所覆盖的流，$G_l$表示GMSC在第$l$次迭代后所覆盖的流，则$Q_G = G_n$。
-令$X_l$代表第$l$次迭代中所选择的掩码带来的价值增量，则$X_l =w(G_l \backslash \bigcup\nolimits^{l-1}_{i=1}G_i)$。
+令$X_l$代表第$l$次迭代中所选择的掩码带来的价值增量，则：
+\begin{equation}
+X_l =w(G_l \backslash \bigcup\nolimits^{l-1}_{i=1}G_i)
+\end{equation}
 
 考虑GMSC已经完成$l-1$轮迭代的情况。在第$l$轮中，GMSC选择了交换机$v^l$和其上的流$X_l$。
 作为对比，最优解法也一定会从$v^l$中选择一个掩码的集合，其中包含的流的集合记为$O_l$。
@@ -82,7 +87,9 @@
 定理\ref{tm:gmscappr}得证。
 \end{proof}
 
-\section{时间复杂度}
+由定理\ref{tm:gmscappr}我们可以很容易得出：使用动态规划解背包问题时，GMSC的近似比为1/2；使用贪心法时，GMSC的近似比为1/3。
+
+\subsubsection{时间复杂度}
 若单背包问题的解法的时间复杂度为$O(\rho)$，更新一个掩码的价值的时间复杂度为$O(\tau)$，则GMSC的时间复杂度为$O(n^2\cdot m \cdot \tau + n^2 \cdot \rho)$。
 
 假设一个掩码中最多有$h$个流，那么$\tau = h\cdot m$。因而：
