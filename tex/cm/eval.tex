@@ -14,7 +14,7 @@
     对每条$f_i$，其相对误差为$|\hat{a}_i-a_i|/a_i$，其中$\hat{a}_i$ 和 $a_i$分别代表流量的估计值和实际值。
     取所有大流的相对误差的平均数为测试指标。
 	\item
-	Sketch的运行时间。让同样的网络流量在同一时刻经过不同的sketch，比较sketch处理这些数据所需的时间。
+	sketch的运行时间。让同样的网络流量在同一时刻经过不同的sketch，比较sketch处理这些数据所需的时间。
 	尽管仿真环境与实际系统有所区别，但仿真环境下sketch的运行时间仍可以反映出算法之间在时间复杂度上的区别。
 %	\item
 %	The average number of CPU cycles for processing a packet. Since the running time might be influenced by many external factors (e.g. , JIT compiling, other running processes), we use CPU cycles as another computing overhead metric on the SDN platform \cite{huang2017sketchvisor}. When a packet arrives at a switch, we compute the required number of CPU cycles for processing each packet on average.
@@ -38,18 +38,17 @@ Count-Min\cite{cormode2004improved}和SketchVisor\cite{huang2017sketchvisor}分�
 \subsection{仿真参数设置}\label{subsec:simulationsetting}
 
 在仿真测试中，我们选择了两种典型且有广泛应用的网络拓扑结构。分别是Fat-tree \cite{al2008scalable}和Spine-Leaf \cite{alizadeh2013data}。
-其中的Fat-tree拓扑，我们设置为核心层有16个交换机、汇聚层和接入层分别有24个交换机。
+对于其中的Fat-tree拓扑，我们设置为核心层有16个交换机、汇聚层和接入层分别有24个交换机。
 Spine-Leaf拓扑则设置为27个“脊”交换机和54个“叶”交换机。其中任意两个叶交换机和脊交换机之间都有一条链路。
 
-为了进行模拟，我们还生成了不同数量的流。我们首先对研究院中的网络流量进行采样，获得了包含约30万条流的trace。
-通过插值的方式生成了不同数量的流的流量大小的分布。
-由于研究院的网络拓扑和仿真所用的网络拓扑不同，我们还需要对这些流生成路由。
+为了进行模拟，我们还生成了不同数量的流。
+我们使用一份研究院以往的包括约30万条流的网络流量采样，通过插值的方式生成了不同数量的流的流量大小的分布。
+由于研究院的网络拓扑和仿真模拟所用的网络拓扑不同，我们还需要对这些流生成路由。
 首先对所有的接入交换机和叶交换机赋予一个随机的权重，然后根据权重随机选择交换机作为流的起点和终点。
 随后使用最短路径算法计算每条流的初始路由。
 
 在重路由中，我们采用\ref{sec:flowrerouting}小节中描述的贪心法，即优先将最大的流分配到最不拥挤的链路。
-
-当有多条最佳路径时，随机选择其中的一条。
+如果同时有多条最佳路径，则随机选择其中的一条。
 
 \begin{figure}
     \centering
@@ -201,7 +200,7 @@ FSS中，bitmap只有一行，每个格子包含两个计数器，因此FSS的�
 		\includegraphics[width=\linewidth]{fig/hy_k_time_200000.pdf}
 		%\small{\caption\tiny{Algorithm Execution Time vs. $k$ with 200,000 flows} }
 	\end{minipage}\vspace{-0.6em}
-	\caption{\textnormal{Sketch运行时间与$k$。20万条流。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
+	\caption{\textnormal{sketch运行时间与$k$。20万条流。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:time,k}
 \end{figure}
 
@@ -217,7 +216,7 @@ FSS中，bitmap只有一行，每个格子包含两个计数器，因此FSS的�
 		\includegraphics[width=\linewidth]{fig/hy_flow_time_1000.pdf}
 		%%\small{\caption{\textnormal{Algorithm Execution Time vs. The number of flows with fixed $k$=1,000}}}
 	\end{minipage} \vspace{-0.6em}%
-	\caption{\textnormal{Sketch运行时间与流数。$k=1000$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
+	\caption{\textnormal{sketch运行时间与流数。$k=1000$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:time,f}
 \end{figure}
 

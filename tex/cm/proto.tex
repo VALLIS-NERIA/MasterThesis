@@ -10,7 +10,7 @@
     第\ref{sec:simulation}节中所述的运行时间会被主机上的其他因素，如代码JIT编译、后台进程等所影响，因此我们采用CPU周期来衡量系统测试中的计算负载\cite{huang2017sketchvisor}。
     通过在sketch代码中插入查询CPU计数器的API，我们可以得到处理一个数据包所需的平均CPU时钟周期数。
 	\item
-    Sketch每秒可处理的数据包数（pps），即吞吐量。我们一次性发送巨大数量的数据包，来测试在占满计算资源的情况下，sketch的处理能力。
+    sketch每秒可处理的数据包数（pps），即吞吐量。我们一次性发送巨大数量的数据包，来测试在占满计算资源的情况下，sketch的处理能力。
 \end{enumerate}
 
 

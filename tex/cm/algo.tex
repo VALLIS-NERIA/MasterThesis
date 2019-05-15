@@ -108,7 +108,7 @@ CountMax具有找出大流的能力。在分析CountMax的具体性能之前，�
 \end{equation}
 由于哈希函数在理论上是独立的，因此对$f_i$和$f_k$的哈希计算可视为两个独立实验。又因为对不同的输入，理想的哈希函数将其散列到每个格子的概率是均等的，因此有：
 \begin{equation}
-    E(I_{i,k,j})=Pr[h_j(f_i)=h_j(f_k)]\le \frac{1}{w}
+    E(I_{i,k,j})=Pr[h_j(f_i)=h_j(f_k)] = \frac{1}{w}
 \end{equation}
 
 接下来定义变量$X_{i,j}$，令其表示在第$j$行中和$f_i$产生了哈希冲突的所有流的流量之和。即：

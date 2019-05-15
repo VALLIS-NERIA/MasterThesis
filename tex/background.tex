@@ -126,8 +126,8 @@ CountSketch和FSS都使用了辅助数据结构，最坏情形下的更新操作
 在这样的假设下，如果sketch要处理经过交换机的所有数据包，那么sketch的吞吐量至少要能达到每秒1200万个数据包。
 第\ref{sec:proto}节中我们对CountSketch和FSS的速度进行了测试，结果显示CountSketch和FSS处理一个数据包所需的CPU时钟周期数分别是约170和110。
 假设这个交换机的CPU主频是1.5GHz，有2个物理核心（在市面上的交换机当中已经属于高端配置，相当于Juniper QFX5100系列\cite{juniper2018qfx5100}），CountSketch和FSS分别占用了68\%和44\%的CPU时间。
-事实上，交换机的CPU还要承担其他的一些工作，比如流表的操作。
-而且交换机上可能还会运行一些其他的服务，网络负载可能会比例子中的更高，这些因素要求了sketch的计算负载必须更低。
+事实上，交换机的CPU还要承担其他的一些工作，比如流表操作、管理界面等。这些工作的优先级很有可能比流量测量更高，使得能够分配给sketch的计算资源更少。
+而且，在实际应用中，$\beta$的数值很有可能比0.2要大，这也要求了sketch的计算负载必须更低。
 
 
 
@@ -138,9 +138,9 @@ CountSketch和FSS都使用了辅助数据结构，最坏情形下的更新操作
 也就是说，即使交换机不再进行流量统计，流表匹配仍旧是必须进行的，因而基于流表的流量统计带来的计算负载实际上微乎其微。
 
 和流表相比，sketch面临的性能瓶颈要严重的多。
-在第\ref{sec:observation}节当中我们假设，一个交换机需要每秒用一个双核1.5GHz的CPU处理1200万，即12Mpps（Packet per Second）。
+在第\ref{sec:observation}节当中我们假设，一个交换机需要每秒用一个双核1.5GHz的CPU处理1200万个数据包，即达到12Mpps（Packet per Second）的吞吐量。
 但是对于交换机而言，每秒12M个数据包只能算是极低的工作负载。
-例如Juniper QFX5100系列交换机配备了和假设中相同的双核1.5GHz的CPU，
+例如Juniper QFX5100系列交换机配备了和\ref{sec:observation}节的例子中相同的双核1.5GHz的CPU，
 然而根据其规格手册，该系列中所有型号的吞吐率都超过了10亿pps\cite{juniper2018qfx5100}，相当于上述假设的近100倍。
 部分型号更是达到了14.4亿pps的吞吐量。
 通过简单的计算便可得出，要想让sketch能够在这颗CPU上达到10亿pps的吞吐量，处理每个数据包不能花费超过3个时钟周期。
@@ -184,7 +184,7 @@ Per-switch方案则是选择若干个交换机，收集它们的全部统计数�
 	\centering
 	\begin{tabular}{c|c|c|c|c}
 		\hline
-		Sketch & 计算负载 &估计误差&大流监测率& 能否识别大流 \\
+		sketch名称 & 计算负载 &估计误差&大流监测率& 能否识别大流 \\
 		\hline
 		Count-Min\cite{cormode2004improved} & 低 &低& 无 &否\\
 		\hline
@@ -192,7 +192,7 @@ Per-switch方案则是选择若干个交换机，收集它们的全部统计数�
 		\hline
 		Filtered Space-Saving\cite{homem2010finding}  & 一般 & 一般&高& 是\\
 		\hline
-		\textbf{Our Sketch} & 低 &低 &高&是\\
+		\textbf{本文设计的sketch} & 低 &低 &高&是\\
 		\hline		
 	\end{tabular}
 	\caption{不同sketch之间的对比}\label{tbl:sketchcompare}
