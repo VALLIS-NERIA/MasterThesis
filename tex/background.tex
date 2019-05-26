@@ -70,6 +70,7 @@ bitmap中的每个格子包括“计数器”和“指示器”两个字段。�
 
 \begin{table}[h]
 	\centering
+	\caption{SketchVisor的计算负载随kick-out频率的变化}\label{tbl:sketchvisor}
 	\begin{tabular}{c|c}
 		\hline
 		Kick-out 频率 & CPU周期/数据包 \\
@@ -85,7 +86,6 @@ bitmap中的每个格子包括“计数器”和“指示器”两个字段。�
 		5\% & 661 \\
 		\hline
 	\end{tabular}
-	\caption{SketchVisor的计算负载随kick-out频率的变化}\label{tbl:sketchvisor}
 \end{table}
 
 \subsection{SketchVisor \cite{huang2017sketchvisor}}\label{subsec:sketchvisor}
@@ -182,6 +182,7 @@ Per-switch方案则是选择若干个交换机，收集它们的全部统计数�
 
 \begin{table*}[ht]
 	\centering
+	\caption{不同sketch之间的对比}\label{tbl:sketchcompare}
 	\begin{tabular}{c|c|c|c|c}
 		\hline
 		sketch名称 & 计算负载 &估计误差&大流监测率& 能否识别大流 \\
@@ -195,8 +196,8 @@ Per-switch方案则是选择若干个交换机，收集它们的全部统计数�
 		\textbf{本文设计的sketch} & 低 &低 &高&是\\
 		\hline		
 	\end{tabular}
-	\caption{不同sketch之间的对比}\label{tbl:sketchcompare}
 \end{table*}
+
 本章首先分析了4种已有sketch的不足，主要是大流识别和计算负载的问题。
 表\ref{tbl:sketchcompare}总结了Count-Min， CountSketch和FSS在不同方面的性能，以及我们设计的sketch应当具有的性能。
 随后本章讨论了流量测量的分布式部署，通过和FSC问题类比，我们确定采取使用掩码的方案。
