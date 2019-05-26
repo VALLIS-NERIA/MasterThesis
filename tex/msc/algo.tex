@@ -10,7 +10,7 @@
 最后，由于这个交换机被分配了掩码，要相应的更新这些掩码在其余交换机上的价值。
 重复这个过程，直到所有交换机都被分配过为止。
 
-这是一个贪心（Greedy）算法，因而称其为GMSC。
+这是一个贪心（greedy）算法，因而称其为GMSC（Greedy-MSC）。
 \begin{algorithm}[htb]
     \small
     \SetAlgoLined
@@ -39,12 +39,13 @@
 作为一个经典问题，单背包问题有多种不同的解法，其中最经典的是动态规划法 \cite{martello1999dynamic}和贪心法\cite{cmulec10}。
 这两种解法早已写入算法教科书中，因而在此不再赘述。
 设背包容量为$B$，可选择的物品数为$m$，则动态规划法的时间复杂度是$O(m\cdot B)$，近似比为1；
+\footnote{近似比描述近似算法的解和最优解之间的关系。目前的文献中，近似比有两种定义。一种为近似比=近似解价值/最优解价值，根据这种定义，近似比为$[0,1]$之间的实数；另一种定义是近似比=最优解价值/近似解价值，这种定义下的近似比为大于等于$1$的实数。本文采用的是前一种定义，因此本文所有提及的近似比都为0到1之间的实数。}
 贪心法的时间复杂度是$O(m \log{m})$，近似比为1/2。
 
 \subsection{GMSC的性能分析}
 \subsubsection{近似性能}
 \begin{theorem}\label{tm:gmscappr}
-    GMSC的近似比为$\frac{\mu}{1+\mu}$，其中$\mu$为单背包问题解法的近似比。
+    GMSC算法的近似比为$\mu/(1+\mu)$，其中$\mu$为单背包问题的解法的近似比。
 \end{theorem}
 
 \begin{proof}
@@ -90,10 +91,13 @@ X_l =w(G_l \backslash \bigcup\nolimits^{l-1}_{i=1}G_i)
 由定理\ref{tm:gmscappr}我们可以很容易得出：使用动态规划解背包问题时，GMSC的近似比为1/2；使用贪心法时，GMSC的近似比为1/3。
 
 \subsubsection{时间复杂度}
-若单背包问题的解法的时间复杂度为$O(\rho)$，更新一个掩码的价值的时间复杂度为$O(\tau)$，则GMSC的时间复杂度为$O(n^2\cdot m \cdot \tau + n^2 \cdot \rho)$。
-
-假设一个掩码中最多有$h$个流，那么$\tau = h\cdot m$。因而：
 
 \begin{theorem}\label{tm:gmsctime}
-    GMSC的时间复杂度为$O(n^2\cdot m^2 \cdot h+ n^2 \cdot \rho)$。
+若单背包问题的解法的时间复杂度为$O(\rho)$，更新一个掩码的价值的时间复杂度为$O(\tau)$，
+一个掩码中最多有$h$个流，GMSC的时间复杂度为$O(n^2\cdot m^2 \cdot h+ n^2 \cdot \rho)$。
 \end{theorem}
+
+\begin{proof}
+    GMSC每轮要解$O(n)$次背包问题，然后更新$n\cdot m$个掩码的价值，总共运行$n$轮，因而其时间复杂度为$O(n^2\cdot m \cdot \tau + n^2 \cdot \rho)$。
+    假设一个掩码中最多有$h$个流，那么$\tau = h\cdot m$，所以GMSC的时间复杂度为$O(n^2\cdot m^2 \cdot h+ n^2 \cdot \rho)$。
+\end{proof}

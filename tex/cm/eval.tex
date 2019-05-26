@@ -26,7 +26,7 @@
 	其中的最大值即是“最大链路负载率”。我们采用重路由之后的最大链路负载率和重路由之前的最大链路负载率之比值作为指标。
 %and select the maximum link load as the metric. To normalize the metric, for each test case, we choose the maximum link load before rerouting as 1, and compare the relative value.
 	\item
-	Heavy hitter的平均估计误差。\ref{sec:analysis}小节中介绍了heavy hitter的定义。
+	heavy hitter的平均估计误差。\ref{sec:analysis}小节中介绍了heavy hitter的定义。
 	“平均估计误差”的定义和第一条指标中的定义相同。
 %	\item
 %	The maximum number of processed packets per second (pps) that a sketch can support. In the platform, we gradually increase the number of packets for each sketch until the switch's CPU is full-loaded. We use this quantity as the metric.
@@ -73,20 +73,6 @@ Spine-Leaf拓扑则设置为27个“脊”交换机和54个“叶”交换机。
 另外，CountMax可以进行协作式部署，我们让CountSketch和FSS也使用类似的策略，进行协作式部署。
 在本章中，除特别说明外，所有sketch都是采用如第\ref{sec:coop}小节所述的协作式策略进行部署的。
 
-\begin{table}[h]
-	\centering
-    \caption{\textnormal{一些基础数据结构的大小}}
-	\begin{tabular}{c|c|c|c|c}
-		\hline
-		Type & IP addr. & port/protocol & counter &pointer\\
-		\hline
-		Size (bit) & 32 & 16 & 64 & 32\\
-		\hline
-		Size (byte) & 4 & 2 & 8 & 4\\
-		\hline
-	\end{tabular}
-    \label{tbl:datasize}
-\end{table}
 
 
 \subsection{存储占用分析}\label{subsec:memory}
@@ -94,6 +80,22 @@ Spine-Leaf拓扑则设置为27个“脊”交换机和54个“叶”交换机。
 为了进行公平的性能对比，我们希望参与比较的3中sketch使用尽量相同的内存空间。因此首先我们分析这些sketch的存储空间消耗。
 表\ref{tbl:datasize}中列出了几种基本数据类型的大小。本文的所有测试中，流的ID都是五元组的形式，其中包含源、目的IP地址和端口，以及协议。
 因此，一个五元组的大小是$ (4 + 2 ) \times 2 + 2=14$字节。
+
+\begin{table}[h]
+	\centering
+    \caption{\textnormal{一些基础数据结构的大小}}
+	\begin{tabular}{c|c|c|c|c}
+		\hline
+		数据类型 & IPv4地址 & 端口/协议号 & 计数器 &指针\\
+		\hline
+		位数 & 32 & 16 & 64 & 32\\
+		\hline
+		字节数 & 4 & 2 & 8 & 4\\
+		\hline
+	\end{tabular}
+    \label{tbl:datasize}
+\end{table}
+
 图\ref{fig:hashheap}中展示的哈希堆中的一项包含一个哈希表项和一个堆元素，总计包含一个五元组、两个指针和一个计数器。
 因此，哈希堆的单位大小是$14+4+4+8=30$个字节。
 
@@ -109,7 +111,7 @@ FSS中，bitmap只有一行，每个格子包含两个计数器，因此FSS的�
 \end{enumerate}
 
 为了让三种sketch拥有接近的内存消耗，令 $d_{CSketch}=d_{CMax}=2$，$l_{FSS}=l_{CSketch}=l_{CMax}=k$，则三种sketch的内存消耗非常接近并且只取决于$k$。
-例如，当$k=1024$的时候，FSS占用$46 \times 1024 = 46$KB，CountSketch占用$(8\times 2 +30)\times 1024 = 46$KB，CountMax占用$22\times 2\times 1024=44$KB。
+例如，当$k=1024$的时候，FSS占用$46 \times 1024 = 46$（KB\footnote{kilobyte, 千字节，下同。}），CountSketch占用$(8\times 2 +30)\times 1024 = 46$（KB），CountMax占用$22\times 2\times 1024=44$（KB）。
 在接下来的章节中，我们通过改变$k$来控制sketch的存储空间。
 
 \subsection{仿真模拟结果}
@@ -319,7 +321,7 @@ CountSketch和FSS使用哈希堆存储大流的ID，因此它们能追踪的流�
 		\centering
 		\includegraphics[width=\linewidth]{fig/hy_k_hh_1000.pdf}
 	\end{minipage}\vspace{-0.6em}%
-	\caption{\textnormal{Heavy hitter估计误差与$k$。$\delta=10^{-3}$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
+	\caption{\textnormal{heavy hitter估计误差与$k$。$\delta=10^{-3}$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:hh,k,1000}
 \end{figure}
 
@@ -333,7 +335,7 @@ CountSketch和FSS使用哈希堆存储大流的ID，因此它们能追踪的流�
 		\centering
 		\includegraphics[width=\linewidth]{fig/hy_k_hh_10000.pdf}
 	\end{minipage}\vspace{-0.6em}%
-	\caption{\textnormal{Heavy hitter估计误差与$k$。$\delta=10^{-4}$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
+	\caption{\textnormal{heavy hitter估计误差与$k$。$\delta=10^{-4}$。 \textit{左图}： Fat-tree; \textit{右图}： Spine-Leaf。}}
 	\label{fig:hh,k,10000}
 \end{figure}
 

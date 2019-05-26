@@ -66,8 +66,8 @@ Bitmap中的每个格子包含两个字段：$Key$和$Counter$。参数$d$和$w$
 \begin{equation}
 \hat{a}_{i_{j}}=\left\{
 \begin{aligned}
-Counter_{j}[h_j(f_i)]&\text{, if $f_i=Key_{j}[h_j(f_i)]$}\\
-0&\text{, otherwise}
+Counter_{j}[h_j(f_i)]&\text{, 若 $f_i=Key_{j}[h_j(f_i)]$}\\
+0&\text{, 若 $f_i \ne Key_{j}[h_j(f_i)]$}
 \end{aligned}
 \right.
 \end{equation}
@@ -83,7 +83,7 @@ Counter_{j}[h_j(f_i)]&\text{, if $f_i=Key_{j}[h_j(f_i)]$}\\
 %\input{analysis.tex}
 
 CountMax具有找出大流的能力。在分析CountMax的具体性能之前，首先对“大流”进行定义。
-在网络中，随着流量分布的变化，字面意义上的top-$k$，即网络中流量最大的$k$条流的特征很难量化。因此，我们采用“Heavy Hitter”作为大流的定义。
+在网络中，随着流量分布的变化，字面意义上的top-$k$，即网络中流量最大的$k$条流的特征很难量化。因此，我们采用“heavy hitter”作为大流的定义。
 
 给定网络中的所有流的集合，其中总共有$n$条流，所有流的流量之和是$F$。给定一个参数$\delta$ （$0<\delta \le 1$），则每一条流量大于或等于$\delta\cdot F$的流就称为这个集合中的$\delta$-``heavy hitter"。
 
@@ -167,7 +167,7 @@ Pr[\frac{\hat{a}_i}{a_i} \ge 1-\frac{e}{w\cdot \delta}]\ge 1-e^{-\tilde{d}}
 接下来分析$\tilde{d}$的数学期望。
 
 \begin{theorem}\label{tm:acc}
-对任何$\delta$-heavy hitter，$E[\tilde{d}]\ge d\cdot(1-\frac{1}{w\cdot\delta})$。
+对任何$\delta$-heavy hitter，$E[\tilde{d}]\ge d\cdot(1-1/(w\cdot\delta))$。
 \end{theorem}
 
 \begin{proof}
@@ -181,15 +181,18 @@ Pr[\frac{\hat{a}_i}{a_i} \ge 1-\frac{e}{w\cdot \delta}]\ge 1-e^{-\tilde{d}}
 \end{align}
 因此 $Pr[Key[h_j(f_i)]=f_i]\ge 1- Pr[X_{i,j}>a_i] \ge 1-\frac{1}{w\cdot\delta}$。
     
-由于bitmap中的每一行是独立的，因此$E[\tilde{d}]\ge d\cdot(1-\frac{1}{w\cdot\delta})$。
+由于bitmap中的每一行是独立的，因此$E[\tilde{d}]\ge d\cdot(1-1/(w\cdot\delta))$。
 \end{proof}
 
 \subsection{时间复杂度分析}
-由于每一行的操作是固定的一次哈希、一次比较、一次加法，因而每行的时间复杂度是$O(1)$。
-CountMax总共有$d$行，所以：
 \begin{theorem}\label{tm:time}
 CountMax对一个数据包进行处理的过程的时间复杂度是$O(d)$。
 \end{theorem}
+
+\begin{proof}
+由于每一行的操作是固定的一次哈希、一次比较、一次加法，因而每行的时间复杂度是$O(1)$。
+CountMax总共有$d$行，所以时间复杂度是$O(d)$。
+\end{proof}
 
 
 
